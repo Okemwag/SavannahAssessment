@@ -1,0 +1,48 @@
+name: Django CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Compose
+        run: |
+          docker-compose up -d --build --force-recreate --remove-orphans
+        working-directory: ${{ github.workspace }}
+
+      - name: Run tests
+        run: |
+          docker compose logs -f   &
+          docker-compose exec -T backend python manage.py test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy Django app
+        uses: appleboy/ssh-action@v0.1.2
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd /home/Okemwa/SavannahAssessment
+            git pull
+            docker-compose up -d --build --force-recreate --remove-orphans
+            sudo chown -R $USER:$USER .
+            sudo chmod a+rwx .

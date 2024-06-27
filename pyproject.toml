@@ -1,0 +1,12 @@
+[tool.black]
+line-length = 88
+target-version = ['py311']
+exclude = '''
+/(
+    \.venv        # Exclude .venv directory
+    |venv         # Exclude venv directory
+    |__pycache__  # Exclude __pycache__ directories
+    |\.git        # Exclude .git directory
+    |\.mypy_cache # Exclude .mypy_cache directory
+)/
+'''
